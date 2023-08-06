@@ -1,0 +1,39 @@
+---
+title: "Fast distance between points"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("Rfast")
+```
+
+```{r}
+bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
+bbox = st_as_sfc(bbox)
+n = 8000
+pts = st_sample(bbox, n)
+```
+
+```{r}
+system.time({
+  m1 = st_distance(pts, which = "Euclidean")
+})
+```
+
+```{r}
+system.time({
+  df = st_coordinates(pts)
+  m2 = Rfast::Dist(df, method = "euclidean")
+})
+```
+```{r}
+all(m1 == m2)
+```
+
+```{r}
+m1[1:5, 1:5]
+```
+
