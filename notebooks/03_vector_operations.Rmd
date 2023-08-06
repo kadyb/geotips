@@ -1,0 +1,91 @@
+---
+title: "Fast vector operations"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("geos")
+set.seed(1)
+```
+
+### Buffer
+
+```{r}
+n = 100000
+df = data.frame(x = rnorm(n), y = rnorm(n))
+pts_sf = st_as_sf(df, coords = c("x", "y"))
+pts_sf = st_as_sfc(pts_sf)
+pts_geos = as_geos_geometry(pts_sf)
+```
+
+```{r}
+system.time({
+  b_sf = st_buffer(pts_sf, 30, nQuadSegs = 30)
+})
+```
+
+```{r}
+system.time({
+  b_geos = geos_buffer(pts_geos, 50, params = geos_buffer_params(quad_segs = 30))
+})
+```
+
+```{r}
+format(object.size(b_sf), units = "auto")
+format(object.size(b_geos), units = "auto")
+```
+
+```{r}
+plot(b_sf, axes = TRUE, main = "Buffers")
+```
+
+### Centroid
+
+```{r}
+system.time({
+  c_sf = st_centroid(b_sf)
+})
+
+```
+
+```{r}
+system.time({
+  c_geos = geos_centroid(b_geos)
+})
+
+```
+
+```{r}
+plot(c_sf, axes = TRUE, pch = 20, main = "Centroids")
+```
+
+### Intersects
+
+```{r}
+poly_sf = st_as_sfc("POINT(0 0)")
+poly_sf = st_buffer(poly_sf, dist = 1)
+poly_geos = as_geos_geometry(poly_sf)
+```
+
+```{r}
+system.time({
+  i_sf = st_intersects(pts_sf, poly_sf, sparse = FALSE, prepared = TRUE)
+})
+```
+
+```{r}
+system.time({
+  i_geos = geos_prepared_intersects(pts_geos, poly_geos)
+})
+```
+
+```{r}
+all(i_sf == i_geos)
+```
+
+```{r}
+summary(as.vector(i_sf))
+```
