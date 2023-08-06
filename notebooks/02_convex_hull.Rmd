@@ -1,0 +1,42 @@
+---
+title: "Fast convex hull"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+set.seed(1)
+```
+
+```{r}
+n = 2000000
+df = data.frame(x = rnorm(n), y = rnorm(n))
+pts = st_as_sf(df, coords = c("x", "y"))
+pts = st_combine(pts)
+```
+
+```{r}
+system.time({
+  ch_sf = st_convex_hull(pts)
+})
+```
+
+```{r}
+system.time({
+  crds = st_coordinates(pts)
+  ch_r = grDevices::chull(crds)
+  ch_r = st_as_sf(df[ch_r, ], coords = c("x", "y"))
+  ch_r = st_cast(st_combine(ch_r), "POLYGON")
+})
+```
+
+```{r}
+st_equals(ch_r, ch_sf, sparse = FALSE)
+```
+
+```{r}
+plot(ch_sf, axes = TRUE, main = "Convex hull")
+```
+
