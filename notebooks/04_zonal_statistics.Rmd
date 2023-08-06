@@ -1,0 +1,66 @@
+---
+title: "Fast zonal statictics"
+output:
+  html_document:
+    df_print: paged
+---
+
+### `{terra}`
+
+```{r message=FALSE}
+library("terra")
+set.seed(1)
+```
+
+```{r}
+f = system.file("ex/lux.shp", package = "terra")
+v = vect(f)
+n = 3000
+r = rast(v, nrows = n, ncols = n, names = "value", vals = rnorm(n ^ 2))
+```
+
+```{r}
+plot(r)
+plot(v, add = TRUE)
+```
+
+```{r}
+system.time({
+  zonal_vector = extract(r, v, fun = "mean")
+})
+```
+```{r}
+system.time({
+  rr = rasterize(v, r, field = seq_len(nrow(v)))
+  zonal_raster = zonal(r, rr, fun = "mean")
+})
+```
+
+```{r}
+all.equal(zonal_vector$value, zonal_raster$value)
+```
+
+```{r}
+head(zonal_vector)
+```
+
+### `{exactextractr}`
+
+```{r message=FALSE}
+library("sf")
+library("exactextractr")
+```
+
+```{r}
+v_sf = st_as_sf(v)
+```
+
+```{r}
+system.time({
+  zonal_exactextractr = exact_extract(r, v_sf, fun = "mean", progress = FALSE)
+})
+```
+
+```{r}
+all.equal(zonal_exactextractr, zonal_vector$value, tolerance = 0.001)
+```
