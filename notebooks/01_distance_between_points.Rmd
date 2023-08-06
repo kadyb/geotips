@@ -8,6 +8,7 @@ output:
 ```{r message=FALSE}
 library("sf")
 library("Rfast")
+set.seed(1)
 ```
 
 ```{r}
