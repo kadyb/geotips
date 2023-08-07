@@ -1,0 +1,49 @@
+---
+title: "Fast polygon rasterization"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("raster")
+library("fasterize")
+```
+
+```{r message=FALSE}
+## download data
+options(timeout = 600)
+tmp = tempdir()
+r_ouput = file.path(tmp, "output.tif")
+f = file.path(tmp, "Mammals_Terrestrial.zip")
+download.file("https://s3.amazonaws.com/hp3-shapefiles/Mammals_Terrestrial.zip",
+              destfile = f) # 383 MB
+unzip(f, exdir = tmp)
+```
+
+### `{fasterize}`
+
+```{r}
+system.time({
+  mammal_shapes = read_sf(file.path(tmp, "Mammals_Terrestrial"))
+  mammal_raster = raster(mammal_shapes, res = 0.1)
+  r = fasterize(mammal_shapes, mammal_raster, field = "PRESENCE")
+  writeRaster(r, r_ouput, options = "COMPRESS=LZW", datatype = "INT1U", NAflag = 0)
+})
+```
+
+### `{GDAL}`
+
+```{r}
+system.time({
+  gdal_utils(util = "rasterize",
+             source = file.path(tmp, "Mammals_Terrestrial"),
+             destination = r_ouput,
+             options = c("-a", "PRESENCE",
+                         "-tr", 0.1, 0.1,
+                         "-a_nodata", 0,
+                         "-ot", "Byte",
+                         "-co", "COMPRESS=LZW"))
+})
+```
