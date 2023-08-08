@@ -1,0 +1,33 @@
+---
+title: "Fast combining objects"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("data.table")
+```
+
+```{r}
+nc = read_sf(system.file("shape/nc.shp", package = "sf"))
+ls = vector("list", 500)
+for (i in seq_along(ls)) ls[[i]] = nc
+```
+
+```{r}
+system.time({
+  dt = rbindlist(ls, use.names = FALSE)
+  dt[["geometry"]] = st_sfc(dt[["geometry"]], recompute_bbox = TRUE)
+  dt = st_as_sf(dt)
+})
+
+```
+
+```{r}
+system.time({
+  df_sf = do.call(rbind, ls)
+})
+
+```
