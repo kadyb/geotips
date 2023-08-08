@@ -1,0 +1,84 @@
+---
+title: "SQL preselection"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("terra")
+set.seed(1)
+```
+
+```{r message=FALSE}
+n = 500000
+df = data.frame(x = rnorm(n), y = rnorm(n),
+                col_1 = sample(c(TRUE, FALSE), n, replace = TRUE), # logical
+                col_2 = sample(letters, n, replace = TRUE),        # character
+                col_3 = runif(n),                                  # double
+                col_4 = sample(1:100, n, replace = TRUE))          # integer
+df = st_as_sf(df, coords = c("x", "y"), crs = 4326)
+
+gpkg = tempfile(fileext = ".gpkg")
+write_sf(df, gpkg, layer = "test")
+```
+
+### `{sf}`
+
+```{r}
+## default
+system.time({
+  x = read_sf(gpkg)
+})
+```
+
+```{r}
+## select columns
+sql = "SELECT geom, col_2 FROM test"
+system.time({
+  x = read_sf(gpkg, query = sql)
+})
+```
+
+```{r}
+## select rows
+sql = "SELECT * FROM test WHERE col_2 = 'a'"
+system.time({
+  x = read_sf(gpkg, query = sql)
+})
+```
+
+```{r}
+## select area
+## slight slower but memory allocation is smaller
+bbox = st_bbox(c(xmin = -1, xmax = 1, ymax = 1, ymin = -1),
+               crs = st_crs(4326))
+bbox = st_as_text(st_as_sfc(bbox))
+system.time({
+  x = read_sf(gpkg, wkt_filter = bbox)
+})
+```
+
+### `{terra}`
+
+```{r}
+## default
+system.time({
+  y = vect(gpkg)
+})
+```
+
+```{r}
+## read only attributes
+system.time({
+  y = vect(gpkg, what = "attributes")
+})
+```
+
+```{r}
+## read only geometry
+system.time({
+  y = vect(gpkg, what = "geoms")
+})
+```
