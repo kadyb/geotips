@@ -1,0 +1,121 @@
+---
+title: "GDAL"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("terra")
+```
+
+### Project
+
+```{r}
+n = 3000 * 3
+r = rast(nrows = n, ncols = n, nlyrs = 3, vals = runif(n ^ 2 * 3))
+input = tempfile(fileext  = ".tif")
+writeRaster(r, input)
+output_terra = tempfile(fileext  = ".tif")
+output_gdal = tempfile(fileext  = ".tif")
+```
+
+```{r}
+system.time({
+  r = rast(input)
+  project(r, "EPSG:3857", method = "bilinear", gdal = TRUE,
+          filename = output_terra, overwrite = TRUE)
+})
+```
+
+```{r}
+system.time({
+  gdal_utils(util = "warp",
+             source = input,
+             destination = output_gdal,
+             options = c("-t_srs", "EPSG:3857",
+                         "-r", "bilinear",
+                         "-co", "COMPRESS=LZW",
+                         "-overwrite")
+             )
+})
+```
+
+### Crop by extent
+
+```{r}
+v = ext(-90, 90, -45, 45)
+
+system.time({
+  r = rast(input)
+  crop(r, v, filename = output_terra, overwrite = TRUE)
+})
+```
+
+```{r}
+ext = c("-90", "45", "90", "-45")
+
+system.time({
+  gdal_utils(util = "translate",
+             source = input,
+             destination = output_gdal,
+             options = c("-projwin", ext,
+                         "-co", "COMPRESS=LZW")
+             )
+})
+```
+
+### Downsample
+
+```{r}
+system.time({
+  r = rast(input)
+  dest = r
+  res(dest) = 0.1
+  resample(r, dest, method = "cubic", filename = output_terra, overwrite = TRUE)
+})
+```
+
+```{r}
+system.time({
+  gdal_utils(util = "translate",
+             source = input,
+             destination = output_gdal,
+             options = c("-tr", 0.1, 0.1,
+                         "-r", "cubic",
+                         "-co", "COMPRESS=LZW")
+             )
+})
+```
+
+### Merging files
+
+```{r}
+r = rast(ncols = 3000, nrows = 3000)
+values(r) = rnorm(ncell(r))
+filename = tempfile(fileext = "_.tif")
+ff = makeTiles(r, 150, filename)
+paste("Number of tiles:", length(ff))
+```
+
+```{r}
+system.time({
+  vrt = vrt(ff)
+  writeRaster(vrt, output_terra, overwrite = TRUE)
+})
+```
+
+```{r}
+system.time({
+  vrt = tempfile(fileext = ".vrt")
+  gdal_utils(util = "buildvrt",
+             source = ff,
+             destination = vrt)
+  gdal_utils(util = "translate",
+             source = vrt,
+             destination = output_gdal,
+             options = c("-co", "COMPRESS=LZW")
+             )
+})
+```
