@@ -1,0 +1,52 @@
+---
+title: "Multi-threaded csv file loading"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("data.table") # library("vroom")
+set.seed(1)
+```
+
+```{r message=FALSE}
+n = 500000
+df = data.frame(x = rnorm(n), y = rnorm(n),
+                col_1 = sample(c(TRUE, FALSE), n, replace = TRUE), # logical
+                col_2 = sample(letters, n, replace = TRUE),        # character
+                col_3 = runif(n),                                  # double
+                col_4 = sample(1:100, n, replace = TRUE))          # integer
+sf = st_as_sf(df, coords = c("x", "y"))
+
+csv = tempfile(fileext = ".csv")
+gpkg = tempfile(fileext = ".gpkg")
+write.csv(df, csv, row.names = FALSE)
+write_sf(sf, gpkg)
+```
+
+```{r}
+## sf + geopackage
+system.time({
+  t1 = read_sf(gpkg)
+})
+```
+
+```{r}
+## sf + csv
+system.time({
+  t2 = read_sf(csv, options = c("AUTODETECT_TYPE=YES",
+                                "X_POSSIBLE_NAMES=x",
+                                "Y_POSSIBLE_NAMES=y",
+                                "KEEP_GEOM_COLUMNS=NO"))
+})
+```
+
+```{r}
+## data.table::fread and csv
+system.time({
+  t3 = fread(csv, nThread = 4)
+  t3 = st_as_sf(t3, coords = c("x", "y"))
+})
+```
