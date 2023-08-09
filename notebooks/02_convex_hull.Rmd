@@ -5,6 +5,15 @@ output:
     df_print: paged
 ---
 
+**
+In the built-in `{grDevices}` package there is `chull()` function, which contains
+an [alternative algorithm](https://dl.acm.org/doi/10.1145/355759.355766) for
+calculating convex hull. It is faster compared to the `sf::st_convex_hull()`.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 set.seed(1)
@@ -40,3 +49,4 @@ st_equals(ch_r, ch_sf, sparse = FALSE)
 plot(ch_sf, axes = TRUE, main = "Convex hull")
 ```
 
+</details>

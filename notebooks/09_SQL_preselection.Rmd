@@ -5,6 +5,16 @@ output:
     df_print: paged
 ---
 
+**
+You can use SQL to pre-filter features in `{sf}` and `{terra}`, so that
+selected objects/columns will be loaded. You can also limit the extent of the
+layer. In addition, in `{terra}` you can limit the loading to attributes or
+geometry only.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("terra")
@@ -82,3 +92,5 @@ system.time({
   y = vect(gpkg, what = "geoms")
 })
 ```
+
+</details>

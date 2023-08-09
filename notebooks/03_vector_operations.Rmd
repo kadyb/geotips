@@ -5,6 +5,15 @@ output:
     df_print: paged
 ---
 
+**
+The [{geos}](https://cran.r-project.org/web/packages/geos/index.html) package
+provides better performance and lower memory footprint compared to `{sf}` for
+processing vector data in a planar coordinate system.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("geos")
@@ -23,7 +32,7 @@ pts_geos = as_geos_geometry(pts_sf)
 
 ```{r}
 system.time({
-  b_sf = st_buffer(pts_sf, 30, nQuadSegs = 30)
+  b_sf = st_buffer(pts_sf, 50, nQuadSegs = 30)
 })
 ```
 
@@ -39,7 +48,8 @@ format(object.size(b_geos), units = "auto")
 ```
 
 ```{r}
-plot(b_sf, axes = TRUE, main = "Buffers")
+idx = sample(length(b_sf), size = 1000)
+plot(b_sf[idx], axes = TRUE, main = "Buffers")
 ```
 
 ### Centroid
@@ -89,3 +99,5 @@ all(i_sf == i_geos)
 ```{r}
 summary(as.vector(i_sf))
 ```
+
+</details>

@@ -5,6 +5,15 @@ output:
     df_print: paged
 ---
 
+**
+The [{wk}](https://cran.r-project.org/web/packages/wk/index.html) package
+provides a very fast alternative to create a polygon grid compared to
+`sf::st_make_grid()`.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("wk")
@@ -26,3 +35,5 @@ system.time({
   grid = st_as_sfc(grid) # convert to sfc
 })
 ```
+
+</details>

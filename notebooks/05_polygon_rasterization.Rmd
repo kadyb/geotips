@@ -5,6 +5,14 @@ output:
     df_print: paged
 ---
 
+**
+In some cases, the [{fasterize}](https://cran.r-project.org/web/packages/fasterize/index.html)
+package is several times faster than GDAL for polygon rasterisation. 
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("raster")
@@ -47,3 +55,5 @@ system.time({
                          "-co", "COMPRESS=LZW"))
 })
 ```
+
+</details>

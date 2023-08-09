@@ -5,6 +5,16 @@ output:
     df_print: paged
 ---
 
+**
+If you have a point layer with many attributes and objects in `.csv`, it is a
+good idea to use the multi-threaded loading available in `data.table::fread()`
+or `vroom::vroom()`. This is much faster than loading `geopackage` or `.csv`
+through GDAL.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("data.table") # library("vroom")
@@ -44,9 +54,11 @@ system.time({
 ```
 
 ```{r}
-## data.table::fread and csv
+## data.table::fread + csv
 system.time({
   t3 = fread(csv, nThread = 4)
   t3 = st_as_sf(t3, coords = c("x", "y"))
 })
 ```
+
+</details>

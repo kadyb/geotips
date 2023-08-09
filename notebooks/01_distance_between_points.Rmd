@@ -5,6 +5,16 @@ output:
     df_print: paged
 ---
 
+**
+You can use `Rfast::Dist()` instead of `sf::st_distance()` to fast calculate
+the Euclidean distance matrix between points. Alternatively, you can use
+`parallelDist::parDist()`, which is multithreaded, but returns a triangle
+instead of a matrix.
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("Rfast")
@@ -38,3 +48,4 @@ all(m1 == m2)
 m1[1:5, 1:5]
 ```
 
+</details>

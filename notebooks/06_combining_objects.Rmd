@@ -5,6 +5,15 @@ output:
     df_print: paged
 ---
 
+**
+Combining vector data using `rbind()` or `dplyr::bind_rows()` can be very slow
+in `{sf}`. A faster alternative is to use `data.table::rbindlist()` or
+`collapse::unlist2d()`. Note, make sure all objects have the same CRS beforehand!!
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("data.table")
@@ -26,8 +35,18 @@ system.time({
 ```
 
 ```{r}
+dim(dt)
+```
+
+```{r}
 system.time({
   df_sf = do.call(rbind, ls)
 })
 
 ```
+
+```{r}
+dim(df_sf)
+```
+
+</details>

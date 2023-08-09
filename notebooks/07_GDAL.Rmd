@@ -5,6 +5,16 @@ output:
     df_print: paged
 ---
 
+**
+Generally there is not much difference between GDAL and `{terra}` (there is
+only very little overhead). However, using `gdal_translate` directly
+(`sf::gdal_utils()`) can be beneficial for data merging (tiles) or resolution
+changes (downsampling / upsampling).
+**
+
+<details>
+<summary>Code</summary>
+
 ```{r message=FALSE}
 library("sf")
 library("terra")
@@ -119,3 +129,5 @@ system.time({
              )
 })
 ```
+
+</details>

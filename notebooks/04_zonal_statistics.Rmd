@@ -5,6 +5,17 @@ output:
     df_print: paged
 ---
 
+**
+Instead of using the vector layer to calculate the zonal statistics of the raster
+(`terra::extract()` function), you can use raster data with zones (`terra::zonal()`
+function), which will be faster. Alternatively, you can use the very fast
+[{exactextractr}](https://cran.r-project.org/web/packages/exactextractr/index.html)
+package.
+**
+
+<details>
+<summary>Code</summary>
+
 ### `{terra}`
 
 ```{r message=FALSE}
@@ -64,3 +75,5 @@ system.time({
 ```{r}
 all.equal(zonal_exactextractr, zonal_vector$value, tolerance = 0.001)
 ```
+
+</details>
