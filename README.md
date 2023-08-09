@@ -2,8 +2,14 @@
 
 1. [Fast distance between points](https://kadyb.github.io/geotips/html/01_distance_between_points.html)
 2. [Fast convex hull](https://kadyb.github.io/geotips/html/02_convex_hull.html)
-3. [Fast vector operations](https://kadyb.github.io/geotips/html/03_vector_operations.html) 
-4. [Fast zonal statistics](https://kadyb.github.io/geotips/html/04_zonal_statistics.html) 
+3. [Fast vector operations](https://kadyb.github.io/geotips/html/03_vector_operations.html)
+4. [Fast zonal statistics](https://kadyb.github.io/geotips/html/04_zonal_statistics.html)
+5. [Fast polygon rasterization](https://kadyb.github.io/geotips/html/05_polygon_rasterization)
+6. [Fast combining objects](https://kadyb.github.io/geotips/html/06_combining_objects.html)
+7. [GDAL](https://kadyb.github.io/geotips/html/07_GDAL.html)
+8. [Multi-threaded csv file loading](https://kadyb.github.io/geotips/html/08_parallel_csv.html)
+9. [SQL preselection](https://kadyb.github.io/geotips/html/09_SQL_preselection.html)
+10. [Fast polygon grid creation](https://kadyb.github.io/geotips/html/10_grid_creation.html)
 
 
 Check out also:
