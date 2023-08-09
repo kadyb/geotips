@@ -1,0 +1,28 @@
+---
+title: "Fast polygon grid creation"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE}
+library("sf")
+library("wk")
+```
+
+```{r}
+## sf
+system.time({
+  bbox = st_bbox(c(xmin = 0, xmax = 500, ymin = 0, ymax = 500))
+  grid = st_make_grid(bbox, cellsize = 1, what = "polygons")
+})
+```
+
+```{r}
+## wk
+system.time({
+  bbox = rct(xmin = 0, xmax = 500, ymin = 0, ymax = 500)
+  grid = grd(bbox, dx = 1, dy = 1, type = "polygons")
+  grid = st_as_sfc(grid) # convert to sfc
+})
+```
