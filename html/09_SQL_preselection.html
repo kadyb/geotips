@@ -11,7 +11,7 @@
 
 
 
-<title>Fast distance between points</title>
+<title>SQL preselection</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1619,48 +1619,88 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Fast distance between points</h1>
+<h1 class="title toc-ignore">SQL preselection</h1>
 
 </div>
 
 
-<p><strong> You can use <code>Rfast::Dist()</code> instead of
-<code>sf::st_distance()</code> to fast calculate the Euclidean distance
-matrix between points. Alternatively, you can use
-<code>parallelDist::parDist()</code>, which is multithreaded, but
-returns a triangle instead of a matrix. </strong></p>
+<p><strong> You can use SQL to pre-filter features in <code>{sf}</code>
+and <code>{terra}</code>, so that selected objects/columns will be
+loaded. You can also limit the extent of the layer. In addition, in
+<code>{terra}</code> you can limit the loading to attributes or geometry
+only. </strong></p>
 <details>
 <summary>
 Code
 </summary>
 <pre class="r"><code>library(&quot;sf&quot;)
-library(&quot;Rfast&quot;)
+library(&quot;terra&quot;)
 set.seed(1)</code></pre>
-<pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
-bbox = st_as_sfc(bbox)
-n = 8000
-pts = st_sample(bbox, n)</code></pre>
-<pre class="r"><code>system.time({
-  m1 = st_distance(pts, which = &quot;Euclidean&quot;)
+<pre class="r"><code>n = 500000
+df = data.frame(x = rnorm(n), y = rnorm(n),
+                col_1 = sample(c(TRUE, FALSE), n, replace = TRUE), # logical
+                col_2 = sample(letters, n, replace = TRUE),        # character
+                col_3 = runif(n),                                  # double
+                col_4 = sample(1:100, n, replace = TRUE))          # integer
+df = st_as_sf(df, coords = c(&quot;x&quot;, &quot;y&quot;), crs = 4326)
+
+gpkg = tempfile(fileext = &quot;.gpkg&quot;)
+write_sf(df, gpkg, layer = &quot;test&quot;)</code></pre>
+<div id="sf" class="section level3">
+<h3><code>{sf}</code></h3>
+<pre class="r"><code>## default
+system.time({
+  x = read_sf(gpkg)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
-<pre class="r"><code>system.time({
-  df = st_coordinates(pts)
-  m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
+##    1.67    0.06    1.73</code></pre>
+<pre class="r"><code>## select columns
+sql = &quot;SELECT geom, col_2 FROM test&quot;
+system.time({
+  x = read_sf(gpkg, query = sql)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
-<pre class="r"><code>all(m1 == m2)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+##    1.29    0.11    1.41</code></pre>
+<pre class="r"><code>## select rows
+sql = &quot;SELECT * FROM test WHERE col_2 = &#39;a&#39;&quot;
+system.time({
+  x = read_sf(gpkg, query = sql)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.08    0.03    0.11</code></pre>
+<pre class="r"><code>## select area
+## slight slower but memory allocation is smaller
+bbox = st_bbox(c(xmin = -1, xmax = 1, ymax = 1, ymin = -1),
+               crs = st_crs(4326))
+bbox = st_as_text(st_as_sfc(bbox))
+system.time({
+  x = read_sf(gpkg, wkt_filter = bbox)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.91    0.60    1.52</code></pre>
+</div>
+<div id="terra" class="section level3">
+<h3><code>{terra}</code></h3>
+<pre class="r"><code>## default
+system.time({
+  y = vect(gpkg)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    1.00    0.09    1.12</code></pre>
+<pre class="r"><code>## read only attributes
+system.time({
+  y = vect(gpkg, what = &quot;attributes&quot;)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.33    0.05    0.37</code></pre>
+<pre class="r"><code>## read only geometry
+system.time({
+  y = vect(gpkg, what = &quot;geoms&quot;)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.76    0.00    0.76</code></pre>
 </details>
+</div>
 
 
 

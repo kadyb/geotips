@@ -11,7 +11,7 @@
 
 
 
-<title>Fast distance between points</title>
+<title>Fast polygon rasterization</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1619,48 +1619,56 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Fast distance between points</h1>
+<h1 class="title toc-ignore">Fast polygon rasterization</h1>
 
 </div>
 
 
-<p><strong> You can use <code>Rfast::Dist()</code> instead of
-<code>sf::st_distance()</code> to fast calculate the Euclidean distance
-matrix between points. Alternatively, you can use
-<code>parallelDist::parDist()</code>, which is multithreaded, but
-returns a triangle instead of a matrix. </strong></p>
+<p><strong> In some cases, the <a href="https://cran.r-project.org/web/packages/fasterize/index.html">{fasterize}</a>
+package is several times faster than GDAL for polygon rasterisation.
+</strong></p>
 <details>
 <summary>
 Code
 </summary>
 <pre class="r"><code>library(&quot;sf&quot;)
-library(&quot;Rfast&quot;)
-set.seed(1)</code></pre>
-<pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
-bbox = st_as_sfc(bbox)
-n = 8000
-pts = st_sample(bbox, n)</code></pre>
+library(&quot;raster&quot;)
+library(&quot;fasterize&quot;)</code></pre>
+<pre class="r"><code>## download data
+options(timeout = 600)
+tmp = tempdir()
+r_ouput = file.path(tmp, &quot;output.tif&quot;)
+f = file.path(tmp, &quot;Mammals_Terrestrial.zip&quot;)
+download.file(&quot;https://s3.amazonaws.com/hp3-shapefiles/Mammals_Terrestrial.zip&quot;,
+              destfile = f) # 383 MB
+unzip(f, exdir = tmp)</code></pre>
+<div id="fasterize" class="section level3">
+<h3><code>{fasterize}</code></h3>
 <pre class="r"><code>system.time({
-  m1 = st_distance(pts, which = &quot;Euclidean&quot;)
+  mammal_shapes = read_sf(file.path(tmp, &quot;Mammals_Terrestrial&quot;))
+  mammal_raster = raster(mammal_shapes, res = 0.1)
+  r = fasterize(mammal_shapes, mammal_raster, field = &quot;PRESENCE&quot;)
+  writeRaster(r, r_ouput, options = &quot;COMPRESS=LZW&quot;, datatype = &quot;INT1U&quot;, NAflag = 0)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
+##    6.18    0.91    7.11</code></pre>
+</div>
+<div id="gdal" class="section level3">
+<h3><code>{GDAL}</code></h3>
 <pre class="r"><code>system.time({
-  df = st_coordinates(pts)
-  m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
+  gdal_utils(util = &quot;rasterize&quot;,
+             source = file.path(tmp, &quot;Mammals_Terrestrial&quot;),
+             destination = r_ouput,
+             options = c(&quot;-a&quot;, &quot;PRESENCE&quot;,
+                         &quot;-tr&quot;, 0.1, 0.1,
+                         &quot;-a_nodata&quot;, 0,
+                         &quot;-ot&quot;, &quot;Byte&quot;,
+                         &quot;-co&quot;, &quot;COMPRESS=LZW&quot;))
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
-<pre class="r"><code>all(m1 == m2)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+##   21.61    7.70   29.44</code></pre>
 </details>
+</div>
 
 
 

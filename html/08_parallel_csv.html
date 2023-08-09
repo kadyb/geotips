@@ -11,7 +11,7 @@
 
 
 
-<title>Fast distance between points</title>
+<title>Multi-threaded csv file loading</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1619,47 +1619,57 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Fast distance between points</h1>
+<h1 class="title toc-ignore">Multi-threaded csv file loading</h1>
 
 </div>
 
 
-<p><strong> You can use <code>Rfast::Dist()</code> instead of
-<code>sf::st_distance()</code> to fast calculate the Euclidean distance
-matrix between points. Alternatively, you can use
-<code>parallelDist::parDist()</code>, which is multithreaded, but
-returns a triangle instead of a matrix. </strong></p>
+<p><strong> If you have a point layer with many attributes and objects
+in <code>.csv</code>, it is a good idea to use the multi-threaded
+loading available in <code>data.table::fread()</code> or
+<code>vroom::vroom()</code>. This is much faster than loading
+<code>geopackage</code> or <code>.csv</code> through GDAL. </strong></p>
 <details>
 <summary>
 Code
 </summary>
 <pre class="r"><code>library(&quot;sf&quot;)
-library(&quot;Rfast&quot;)
+library(&quot;data.table&quot;) # library(&quot;vroom&quot;)
 set.seed(1)</code></pre>
-<pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
-bbox = st_as_sfc(bbox)
-n = 8000
-pts = st_sample(bbox, n)</code></pre>
-<pre class="r"><code>system.time({
-  m1 = st_distance(pts, which = &quot;Euclidean&quot;)
+<pre class="r"><code>n = 500000
+df = data.frame(x = rnorm(n), y = rnorm(n),
+                col_1 = sample(c(TRUE, FALSE), n, replace = TRUE), # logical
+                col_2 = sample(letters, n, replace = TRUE),        # character
+                col_3 = runif(n),                                  # double
+                col_4 = sample(1:100, n, replace = TRUE))          # integer
+sf = st_as_sf(df, coords = c(&quot;x&quot;, &quot;y&quot;))
+
+csv = tempfile(fileext = &quot;.csv&quot;)
+gpkg = tempfile(fileext = &quot;.gpkg&quot;)
+write.csv(df, csv, row.names = FALSE)
+write_sf(sf, gpkg)</code></pre>
+<pre class="r"><code>## sf + geopackage
+system.time({
+  t1 = read_sf(gpkg)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
-<pre class="r"><code>system.time({
-  df = st_coordinates(pts)
-  m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
+##    1.65    0.06    1.73</code></pre>
+<pre class="r"><code>## sf + csv
+system.time({
+  t2 = read_sf(csv, options = c(&quot;AUTODETECT_TYPE=YES&quot;,
+                                &quot;X_POSSIBLE_NAMES=x&quot;,
+                                &quot;Y_POSSIBLE_NAMES=y&quot;,
+                                &quot;KEEP_GEOM_COLUMNS=NO&quot;))
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
-<pre class="r"><code>all(m1 == m2)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+##    3.84    2.39    6.30</code></pre>
+<pre class="r"><code>## data.table::fread + csv
+system.time({
+  t3 = fread(csv, nThread = 4)
+  t3 = st_as_sf(t3, coords = c(&quot;x&quot;, &quot;y&quot;))
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.21    0.03    0.14</code></pre>
 </details>
 
 

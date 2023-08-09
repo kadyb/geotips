@@ -11,7 +11,7 @@
 
 
 
-<title>Fast distance between points</title>
+<title>Fast polygon grid creation</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1619,47 +1619,35 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Fast distance between points</h1>
+<h1 class="title toc-ignore">Fast polygon grid creation</h1>
 
 </div>
 
 
-<p><strong> You can use <code>Rfast::Dist()</code> instead of
-<code>sf::st_distance()</code> to fast calculate the Euclidean distance
-matrix between points. Alternatively, you can use
-<code>parallelDist::parDist()</code>, which is multithreaded, but
-returns a triangle instead of a matrix. </strong></p>
+<p><strong> The <a href="https://cran.r-project.org/web/packages/wk/index.html">{wk}</a>
+package provides a very fast alternative to create a polygon grid
+compared to <code>sf::st_make_grid()</code>. </strong></p>
 <details>
 <summary>
 Code
 </summary>
 <pre class="r"><code>library(&quot;sf&quot;)
-library(&quot;Rfast&quot;)
-set.seed(1)</code></pre>
-<pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
-bbox = st_as_sfc(bbox)
-n = 8000
-pts = st_sample(bbox, n)</code></pre>
-<pre class="r"><code>system.time({
-  m1 = st_distance(pts, which = &quot;Euclidean&quot;)
+library(&quot;wk&quot;)</code></pre>
+<pre class="r"><code>## sf
+system.time({
+  bbox = st_bbox(c(xmin = 0, xmax = 500, ymin = 0, ymax = 500))
+  grid = st_make_grid(bbox, cellsize = 1, what = &quot;polygons&quot;)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
-<pre class="r"><code>system.time({
-  df = st_coordinates(pts)
-  m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
+##    7.47    0.06    7.54</code></pre>
+<pre class="r"><code>## wk
+system.time({
+  bbox = rct(xmin = 0, xmax = 500, ymin = 0, ymax = 500)
+  grid = grd(bbox, dx = 1, dy = 1, type = &quot;polygons&quot;)
+  grid = st_as_sfc(grid) # convert to sfc
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
-<pre class="r"><code>all(m1 == m2)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+##    0.56    0.02    0.58</code></pre>
 </details>
 
 

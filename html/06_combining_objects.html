@@ -11,7 +11,7 @@
 
 
 
-<title>Fast distance between points</title>
+<title>Fast combining objects</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1619,47 +1619,41 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Fast distance between points</h1>
+<h1 class="title toc-ignore">Fast combining objects</h1>
 
 </div>
 
 
-<p><strong> You can use <code>Rfast::Dist()</code> instead of
-<code>sf::st_distance()</code> to fast calculate the Euclidean distance
-matrix between points. Alternatively, you can use
-<code>parallelDist::parDist()</code>, which is multithreaded, but
-returns a triangle instead of a matrix. </strong></p>
+<p><strong> Combining vector data using <code>rbind()</code> or
+<code>dplyr::bind_rows()</code> can be very slow in <code>{sf}</code>. A
+faster alternative is to use <code>data.table::rbindlist()</code> or
+<code>collapse::unlist2d()</code>. Note, make sure all objects have the
+same CRS beforehand!! </strong></p>
 <details>
 <summary>
 Code
 </summary>
 <pre class="r"><code>library(&quot;sf&quot;)
-library(&quot;Rfast&quot;)
-set.seed(1)</code></pre>
-<pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
-bbox = st_as_sfc(bbox)
-n = 8000
-pts = st_sample(bbox, n)</code></pre>
+library(&quot;data.table&quot;)</code></pre>
+<pre class="r"><code>nc = read_sf(system.file(&quot;shape/nc.shp&quot;, package = &quot;sf&quot;))
+ls = vector(&quot;list&quot;, 500)
+for (i in seq_along(ls)) ls[[i]] = nc</code></pre>
 <pre class="r"><code>system.time({
-  m1 = st_distance(pts, which = &quot;Euclidean&quot;)
+  dt = rbindlist(ls, use.names = FALSE)
+  dt[[&quot;geometry&quot;]] = st_sfc(dt[[&quot;geometry&quot;]], recompute_bbox = TRUE)
+  dt = st_as_sf(dt)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
+##    0.05    0.00    0.04</code></pre>
+<pre class="r"><code>dim(dt)</code></pre>
+<pre><code>## [1] 50000    15</code></pre>
 <pre class="r"><code>system.time({
-  df = st_coordinates(pts)
-  m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
+  df_sf = do.call(rbind, ls)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
-<pre class="r"><code>all(m1 == m2)</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+##    8.87    0.16    9.03</code></pre>
+<pre class="r"><code>dim(df_sf)</code></pre>
+<pre><code>## [1] 50000    15</code></pre>
 </details>
 
 

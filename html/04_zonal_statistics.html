@@ -1624,6 +1624,15 @@ display: none;
 </div>
 
 
+<p><strong> Instead of using the vector layer to calculate the zonal
+statistics of the raster (<code>terra::extract()</code> function), you
+can use raster data with zones (<code>terra::zonal()</code> function),
+which will be faster. Alternatively, you can use the very fast <a href="https://cran.r-project.org/web/packages/exactextractr/index.html">{exactextractr}</a>
+package. </strong></p>
+<details>
+<summary>
+Code
+</summary>
 <div id="terra" class="section level3">
 <h3><code>{terra}</code></h3>
 <pre class="r"><code>library(&quot;terra&quot;)
@@ -1639,13 +1648,13 @@ plot(v, add = TRUE)</code></pre>
   zonal_vector = extract(r, v, fun = &quot;mean&quot;)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    8.07    0.33    8.41</code></pre>
+##    8.19    0.27    8.47</code></pre>
 <pre class="r"><code>system.time({
   rr = rasterize(v, r, field = seq_len(nrow(v)))
   zonal_raster = zonal(r, rr, fun = &quot;mean&quot;)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.16    0.05    0.20</code></pre>
+##    0.18    0.02    0.18</code></pre>
 <pre class="r"><code>all.equal(zonal_vector$value, zonal_raster$value)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>head(zonal_vector)</code></pre>
@@ -1664,9 +1673,10 @@ library(&quot;exactextractr&quot;)</code></pre>
   zonal_exactextractr = exact_extract(r, v_sf, fun = &quot;mean&quot;, progress = FALSE)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.31    0.02    0.33</code></pre>
+##    0.24    0.09    0.33</code></pre>
 <pre class="r"><code>all.equal(zonal_exactextractr, zonal_vector$value, tolerance = 0.001)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
+</details>
 </div>
 
 
