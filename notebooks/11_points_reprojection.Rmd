@@ -1,0 +1,44 @@
+---
+title: "Fast points reprojection"
+output:
+  html_document:
+    df_print: paged
+---
+
+**
+In `{sf}` you can find the `sf_project()` function, which is used to reproject
+points by the PROJ library directly (bypassing GDAL), which is a faster
+alternative to `st_transform()`.
+**
+
+<details>
+<summary>Code</summary>
+
+```{r message=FALSE}
+library("sf")
+```
+
+```{r}
+n = 500000
+df = data.frame(x = rnorm(n), y = rnorm(n))
+pts = st_as_sf(df, coords = c("x", "y"), crs = "EPSG:4326")
+```
+
+```{r}
+system.time({
+  x = st_transform(pts, crs = "EPSG:3857")
+})
+```
+
+```{r}
+system.time({
+  y = sf_project(from = "EPSG:4326", to = "EPSG:3857", pts = st_coordinates(pts))
+  y = st_as_sf(as.data.frame(y), crs = "EPSG:3857", coords = 1:2)
+})
+```
+
+```{r}
+identical(x, y)
+```
+
+</details>
