@@ -10,6 +10,7 @@
 8. [Multi-threaded csv file loading](https://kadyb.github.io/geotips/html/08_parallel_csv.html)
 9. [SQL preselection](https://kadyb.github.io/geotips/html/09_SQL_preselection.html)
 10. [Fast polygon grid creation](https://kadyb.github.io/geotips/html/10_grid_creation.html)
+11. [Fast points reprojection](https://kadyb.github.io/geotips/html/11_points_reprojection.html)
 
 
 Check out also:
