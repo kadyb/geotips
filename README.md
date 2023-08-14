@@ -13,6 +13,12 @@
 11. [Fast points reprojection](https://kadyb.github.io/geotips/html/11_points_reprojection.html)
 
 
+Blogposts:
+  * [Fast Inverse Distance Weighting (IDW) Interpolation with Rcpp](https://geobrinkmann.com/post/iwd/) by Sebastian Brinkmann
+  * [Geospatial distributed processing with furrr](https://posit.co/blog/geospatial-distributed-processing-with-furrr/) by Ryan Garnett
+  * [Speeding up spatial analyses by integrating `sf` and `data.table`: a test case] by Lorenzo Busetto
+
+
 Check out also:
   * [Raster processing benchmark](https://github.com/kadyb/raster-benchmark)
   * [Vector processing benchmark](https://github.com/kadyb/vector-benchmark)
