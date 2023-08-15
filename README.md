@@ -19,6 +19,6 @@ Blogposts:
   * [Speeding up spatial analyses by integrating sf and data.table: a test case](https://lbusettspatialr.blogspot.com/2018/02/speeding-up-spatial-analyses-by.html) by Lorenzo Busetto
 
 
-Check out also:
-  * [Raster processing benchmark](https://github.com/kadyb/raster-benchmark)
-  * [Vector processing benchmark](https://github.com/kadyb/vector-benchmark)
+**R** and **Python** spatial packages benchmark:
+  * [Raster processing](https://github.com/kadyb/raster-benchmark)
+  * [Vector processing](https://github.com/kadyb/vector-benchmark)
