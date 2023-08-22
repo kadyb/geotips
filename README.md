@@ -17,6 +17,7 @@ Blogposts:
   * [Fast Inverse Distance Weighting (IDW) Interpolation with Rcpp](https://geobrinkmann.com/post/iwd/) by Sebastian Brinkmann
   * [Geospatial distributed processing with furrr](https://posit.co/blog/geospatial-distributed-processing-with-furrr/) by Ryan Garnett
   * [Speeding up spatial analyses by integrating sf and data.table: a test case](https://lbusettspatialr.blogspot.com/2018/02/speeding-up-spatial-analyses-by.html) by Lorenzo Busetto
+  * [Parallel raster processing in stars](https://kadyb.github.io/stars-parallel/Tutorial.html) by Krzysztof Dyba
 
 
 **R** and **Python** spatial packages benchmark:
