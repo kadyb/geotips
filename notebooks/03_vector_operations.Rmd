@@ -43,11 +43,6 @@ system.time({
 ```
 
 ```{r}
-format(object.size(b_sf), units = "auto")
-format(object.size(b_geos), units = "auto")
-```
-
-```{r}
 idx = sample(length(b_sf), size = 1000)
 plot(b_sf[idx], axes = TRUE, main = "Buffers")
 ```
