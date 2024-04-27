@@ -1,0 +1,46 @@
+---
+title: "Fast loading and saving of GeoJSON"
+output:
+  html_document:
+    df_print: paged
+---
+
+**
+The [{yyjsonr}](https://github.com/coolbutuseless/yyjsonr) package offers fast
+loading and saving of GeoJSON files compared to the GDAL used by, for example,
+`{sf}` and `{terra}`. However, GDAL has more features like filtering based on
+criteria.
+**
+
+<details>
+<summary>Code</summary>
+
+```{r message=FALSE}
+library("sf")
+library("yyjsonr")
+options(timeout = 600) # connection timeout
+```
+
+```{r message=FALSE}
+## download dataset
+url = "https://github.com/paleolimbot/geoarrow-data/releases/download/v0.0.1/nshn_land_poly.gpkg"
+download.file(url, "nshn_land_poly.gpkg", mode = "wb")
+data = read_sf("nshn_land_poly.gpkg") # 24037 polygons x 11 attributes
+data = st_transform(data, "EPSG:4326") # transform to WGS84
+```
+
+**Data saving**
+
+```{r}
+system.time( sf::write_sf(data, "test.geojson") )
+system.time( yyjsonr::write_geojson_file(data, "test.geojson") )
+```
+
+**Data loading**
+
+```{r}
+system.time( sf::read_sf("test.geojson") )
+system.time( yyjsonr::read_geojson_file("test.geojson") )
+```
+
+</details>
