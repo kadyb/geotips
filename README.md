@@ -11,6 +11,9 @@
 9. [SQL preselection](https://kadyb.github.io/geotips/html/09_SQL_preselection.html)
 10. [Fast polygon grid creation](https://kadyb.github.io/geotips/html/10_grid_creation.html)
 11. [Fast points reprojection](https://kadyb.github.io/geotips/html/11_points_reprojection.html)
+12. [Fast loading and saving of GeoJSON](https://kadyb.github.io/geotips/html/12_GeoJSON.html)
+
+**Contributions are welcome. I would love to hear what tricks you use!**
 
 
 Blogposts:
