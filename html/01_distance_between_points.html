@@ -1638,28 +1638,28 @@ library(&quot;Rfast&quot;)
 set.seed(1)</code></pre>
 <pre class="r"><code>bbox = st_bbox(c(xmin = 0, xmax = 1, ymax = 0, ymin = 1))
 bbox = st_as_sfc(bbox)
-n = 8000
+n = 10000
 pts = st_sample(bbox, n)</code></pre>
 <pre class="r"><code>system.time({
   m1 = st_distance(pts, which = &quot;Euclidean&quot;)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    2.53    0.20    2.73</code></pre>
+##    1.18    0.19    1.36</code></pre>
 <pre class="r"><code>system.time({
   df = st_coordinates(pts)
   m2 = Rfast::Dist(df, method = &quot;euclidean&quot;)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.40    0.05    0.45</code></pre>
+##    0.55    0.18    0.72</code></pre>
 <pre class="r"><code>all(m1 == m2)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>m1[1:5, 1:5]</code></pre>
-<pre><code>##           1         2         3         4         5
-## 1 0.0000000 0.1066168 0.7185182 0.7058747 0.5910929
-## 2 0.1066168 0.0000000 0.6803274 0.6106702 0.6124067
-## 3 0.7185182 0.6803274 0.0000000 0.4902320 0.3762861
-## 4 0.7058747 0.6106702 0.4902320 0.0000000 0.7659294
-## 5 0.5910929 0.6124067 0.3762861 0.7659294 0.0000000</code></pre>
+<pre><code>##            1         2         3         4          5
+## 1 0.00000000 0.6211186 0.7377293 0.6443854 0.06633203
+## 2 0.62111859 0.0000000 0.2091530 0.7790792 0.65260806
+## 3 0.73772930 0.2091530 0.0000000 0.7084691 0.78236784
+## 4 0.64438539 0.7790792 0.7084691 0.0000000 0.70947711
+## 5 0.06633203 0.6526081 0.7823678 0.7094771 0.00000000</code></pre>
 </details>
 
 
