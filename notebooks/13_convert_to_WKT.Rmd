@@ -1,0 +1,43 @@
+---
+title: "Faster conversion from sf to WKT"
+output:
+  html_document:
+    df_print: paged
+---
+
+**
+The [lwgeom](https://cran.r-project.org/web/packages/lwgeom/index.html) package
+and the use of the global `Sys.setenv("LWGEOM_WKT" = "true")` option allows
+faster conversion of *simple features* objects to well-known text (WKT)
+representation, due to the use of low-level code. It also enables faster
+printing of complex geometries.
+**
+
+<details>
+<summary>Code</summary>
+
+```{r message=FALSE}
+library("sf")
+```
+
+```{r}
+# generate some data
+n = 100000
+pts = data.frame(x = rnorm(n), y = rnorm(n))
+pts = st_as_sf(pts, coords = c("x", "y"))
+pts = st_as_sfc(pts)
+```
+
+```{r}
+system.time(x <- st_as_text(pts))
+x[1]
+```
+
+```{r}
+# `lwgeom` must be installed
+Sys.setenv("LWGEOM_WKT" = "true")
+system.time(y <- st_as_text(pts))
+y[1]
+```
+
+</details>
