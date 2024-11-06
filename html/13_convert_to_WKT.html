@@ -1629,7 +1629,12 @@ package and the use of the global
 <code>Sys.setenv(&quot;LWGEOM_WKT&quot; = &quot;true&quot;)</code> option allows faster
 conversion of <em>simple features</em> objects to well-known text (WKT)
 representation, due to the use of low-level code. It also enables faster
-printing of complex geometries. </strong></p>
+printing of complex geometries. Note that using this method, the output
+may differ from the default, which can cause reproducibility problems.
+</strong></p>
+<p><strong> Alternatively, you can also use the <a href="https://r-spatial.github.io/lwgeom/reference/st_astext.html">lwgeom::st_astext()</a>
+and <a href="https://paleolimbot.github.io/wk/reference/wkt.html">wk::as_wkt()</a>
+functions directly. </strong></p>
 <details>
 <summary>
 Code
@@ -1642,16 +1647,16 @@ pts = st_as_sf(pts, coords = c(&quot;x&quot;, &quot;y&quot;))
 pts = st_as_sfc(pts)</code></pre>
 <pre class="r"><code>system.time(x &lt;- st_as_text(pts))</code></pre>
 <pre><code>##    user  system elapsed 
-##    7.38    0.11    7.48</code></pre>
+##    7.36    0.16    7.51</code></pre>
 <pre class="r"><code>x[1]</code></pre>
-<pre><code>## [1] &quot;POINT (-0.1983281 -0.5833962)&quot;</code></pre>
+<pre><code>## [1] &quot;POINT (0.007360117 -1.83104)&quot;</code></pre>
 <pre class="r"><code># `lwgeom` must be installed
 Sys.setenv(&quot;LWGEOM_WKT&quot; = &quot;true&quot;)
 system.time(y &lt;- st_as_text(pts))</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.20    0.00    0.21</code></pre>
+##    0.20    0.01    0.22</code></pre>
 <pre class="r"><code>y[1]</code></pre>
-<pre><code>## [1] &quot;POINT(-0.1983281 -0.5833962)&quot;</code></pre>
+<pre><code>## [1] &quot;POINT(0.0073601 -1.8310401)&quot;</code></pre>
 </details>
 
 

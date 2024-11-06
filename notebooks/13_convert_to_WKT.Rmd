@@ -10,7 +10,15 @@ The [lwgeom](https://cran.r-project.org/web/packages/lwgeom/index.html) package
 and the use of the global `Sys.setenv("LWGEOM_WKT" = "true")` option allows
 faster conversion of *simple features* objects to well-known text (WKT)
 representation, due to the use of low-level code. It also enables faster
-printing of complex geometries.
+printing of complex geometries. Note that using this method, the output may
+differ from the default, which can cause reproducibility problems.
+**
+
+**
+Alternatively, you can also use the
+[lwgeom::st_astext()](https://r-spatial.github.io/lwgeom/reference/st_astext.html)
+and [wk::as_wkt()](https://paleolimbot.github.io/wk/reference/wkt.html)
+functions directly.
 **
 
 <details>
