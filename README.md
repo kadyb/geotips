@@ -18,6 +18,7 @@
 **Contributions are welcome. I would love to hear what tricks you use!**
 
 
+\
 Blogposts:
   * [Fast Inverse Distance Weighting (IDW) Interpolation with Rcpp](https://geobrinkmann.com/post/iwd/) by Sebastian Brinkmann
   * [Geospatial distributed processing with furrr](https://posit.co/blog/geospatial-distributed-processing-with-furrr/) by Ryan Garnett
@@ -25,6 +26,6 @@ Blogposts:
   * [Parallel raster processing in stars](https://kadyb.github.io/stars-parallel/Tutorial.html) by Krzysztof Dyba
 
 
-**R** and **Python** spatial packages benchmark:
+**R**, **Python** and **Julia** spatial packages benchmark:
   * [Raster processing](https://github.com/kadyb/raster-benchmark)
   * [Vector processing](https://github.com/kadyb/vector-benchmark)
