@@ -13,6 +13,7 @@
 11. [Fast points reprojection](https://kadyb.github.io/geotips/html/11_points_reprojection.html)
 12. [Fast loading and saving of GeoJSON](https://kadyb.github.io/geotips/html/12_GeoJSON.html)
 13. [Faster conversion from sf to WKT](https://kadyb.github.io/geotips/html/13_convert_to_WKT.html)
+14. [Vector data compression](https://kadyb.github.io/geotips/html/14_vector_compression.html)
 
 **Contributions are welcome. I would love to hear what tricks you use!**
 

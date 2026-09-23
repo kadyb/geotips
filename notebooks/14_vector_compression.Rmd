@@ -1,0 +1,75 @@
+---
+title: "Vector data compression"
+output:
+  html_document:
+    df_print: paged
+---
+
+**
+If you need to compress vector data that lacks an internal compression
+mechanism (GeoPackage, Shapefile, FlatGeobuf), consider using the
+[Seek-Optimized ZIP](https://gdal.org/en/stable/programs/sozip.html)
+profile implemented in GDAL, which minimizes the overhead associated
+with loading data compared to the standard ZIP format.
+**
+
+<details>
+<summary>Code</summary>
+
+```{r message=FALSE}
+library("sf")
+library("zip")
+```
+
+```{r}
+set.seed(1)
+
+# generate some data
+n = 500000
+df = data.frame(x = runif(n, 160000, 877000), y = runif(n, 126000, 780000))
+df = st_as_sf(df, coords = c("x", "y"), crs = "EPSG:2180")
+buff = st_buffer(df, dist = 5000)
+```
+
+**Comparison of disk space usage (MB):**
+
+```{r}
+# uncompressed geopackage
+write_sf(buff, "test.gpkg", driver = "GPKG")
+file.size("test.gpkg") / 1024 ^ 2
+
+# compressed geopackage with SOZip
+write_sf(buff, "test.gpkg.zip", driver = "GPKG")
+file.size("test.gpkg.zip") / 1024 ^ 2
+
+# compressed geopackage without SOZip
+zip::zip("test.zip", "test.gpkg")
+file.size("test.zip") / 1024 ^ 2
+```
+
+**Comparison of data loading performance:**
+
+```{r}
+# uncompressed geopackage
+system.time({
+  read_sf("test.gpkg")
+})
+
+# compressed geopackage with SOZip
+system.time({
+  read_sf("test.gpkg.zip")
+})
+
+# compressed geopackage without SOZip
+system.time({
+  read_sf("/vsizip/test.zip")
+})
+
+# first unzip, then read geopackage
+system.time({
+  unzip("test.gpkg.zip", exdir = "test")
+  read_sf("test/test.gpkg")
+})
+```
+
+</details>
